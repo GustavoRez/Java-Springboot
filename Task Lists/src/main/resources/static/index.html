@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>To-do List</title>
+    <link rel="stylesheet" href="css/tarefas.css">
+</head>
+
+<body>
+    <div id="nav">
+        <strong><a href="/">Home</a></strong> | <a style="text-decoration: none;" href="/listaMercado.html">Lista de Mercado</a>
+    </div>
+
+    <div id="content">
+        <h1>Minhas Tarefas</h1>
+        <ul id="lista"></ul>
+        <input type="text" id="novaTarefa" placeholder="Nova tarefa">
+        <button onclick="adicionarTarefa()">Adicionar</button>
+    </div>
+
+    <script>
+        async function carregarTarefas() {
+            const res = await fetch('/tarefas');
+            const tarefas = await res.json();
+            const lista = document.getElementById('lista');
+            lista.innerHTML = '';
+
+            tarefas.forEach(t => {
+                const li = document.createElement('li');
+
+                const spanTexto = document.createElement('span');
+                spanTexto.textContent = t.titulo + (t.concluida ? ' ✅' : '');
+
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '❌';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deletarTarefa(t.id);
+                };
+
+                li.onclick = () => marcarConcluida(t.id);
+
+                li.appendChild(spanTexto);
+                li.appendChild(delBtn);
+
+                lista.appendChild(li);
+            });
+        }
+
+        async function adicionarTarefa() {
+            const titulo = document.getElementById('novaTarefa').value;
+            await fetch('/tarefas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ titulo: titulo, concluida: false })
+            });
+
+            document.getElementById('novaTarefa').value = '';
+            carregarTarefas();
+        }
+
+        async function marcarConcluida(id) {
+            await fetch(`/tarefas/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            carregarTarefas();
+        }
+
+        async function deletarTarefa(id) {
+            await fetch(`/tarefas/${id}`, { method: 'DELETE' });
+            carregarTarefas();
+        }
+
+        carregarTarefas();
+    </script>
+</body>
+
+</html>

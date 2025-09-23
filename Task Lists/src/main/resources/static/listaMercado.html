@@ -1,13 +1,90 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/mercado.css">
     <title>Lista de Mercado</title>
 </head>
+
 <body>
     <div id="nav">
-        <a style="text-decoration: none;" href="/">Home</a> | <strong><a href="/listaMercado.html">Lista de Mercado</a></strong>
+        <a style="text-decoration: none;" href="/">Home</a> | <strong><a href="/listaMercado.html">Lista de
+                Mercado</a></strong>
     </div>
+
+    <div id="content">
+        <h1>Lista do Mercado</h1>
+        <ul id="lista"></ul>
+        <div>
+            <input type="text" id="novoItem" placeholder="Novo item">
+            <input type="number" id="novaQuantidade" placeholder="Qtd">
+        </div>
+        <button onclick="adicionarItem()">Adicionar</button>
+    </div>
+    <p id="total"></p>
+
+    <script>
+        const carregarCompras = async () => {
+            const res = await fetch('/listaMercado');
+            const compras = await res.json();
+            const lista = document.getElementById('lista');
+            lista.innerHTML = '';
+            total.textContent = '';
+
+            compras.forEach(c => {
+                const li = document.createElement('li');
+
+                const spanTexto = document.createElement('span');
+                spanTexto.textContent = c.nome + ' - ' + c.quantidade + 'un';
+                spanTexto.onclick = () => {
+                    spanTexto.style.textDecoration = spanTexto.style.textDecoration != 'none' ? 'none' : 'line-through';
+                };
+
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '❌';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deletarCompra(c.id);
+                };
+
+                li.appendChild(spanTexto);
+                li.appendChild(delBtn);
+
+                lista.appendChild(li);
+
+                const total = document.getElementById('total');
+                let soma = 0;
+                compras.forEach(c => soma += c.preco * c.quantidade);
+                total.textContent = 'Total: R$ ' + soma.toFixed(2);
+            });
+        }
+
+        const adicionarItem = async () => {
+            const nome = document.getElementById('novoItem').value;
+            const qtd = document.getElementById('novaQuantidade').value;
+            const valores = [7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0];
+            const valor = Math.floor(Math.random() * valores.length);
+            await fetch('/listaMercado', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome: nome, quantidade: qtd, preco: valores[valor] })
+            });
+            console.log(nome, qtd, valores[valor]);
+            document.getElementById('novoItem').value = '';
+            document.getElementById('novaQuantidade').value = '';
+            document.getElementById('lista').innerHTML = '';
+            carregarCompras();
+        };
+
+        const deletarCompra = async (id) => {
+            await fetch(`/listaMercado/${id}`, { method: 'DELETE' });
+            carregarCompras();
+        };
+
+        carregarCompras();
+    </script>
 </body>
+
 </html>

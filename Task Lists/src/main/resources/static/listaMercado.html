@@ -35,12 +35,11 @@
 
             compras.forEach(c => {
                 const li = document.createElement('li');
+                li.onclick = () => spanTexto.style.textDecoration = (spanTexto.style.textDecoration == 'line-through' ? 'none' : 'line-through');
 
                 const spanTexto = document.createElement('span');
                 spanTexto.textContent = c.nome + ' - ' + c.quantidade + 'un';
-                spanTexto.onclick = () => {
-                    spanTexto.style.textDecoration = spanTexto.style.textDecoration != 'none' ? 'none' : 'line-through';
-                };
+                
 
                 const delBtn = document.createElement('button');
                 delBtn.textContent = '❌';
